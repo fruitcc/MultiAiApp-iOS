@@ -5,7 +5,7 @@ class APIManager {
     private var settingsManager: SettingsManager?
     
     // Backend URL - change this to your production URL when deploying
-    private let backendURL = "http://localhost:3000/api/ai"
+    private let backendURL = "http://localhost:48395/api/ai"
     
     private init() {}
     
@@ -94,7 +94,7 @@ class APIManager {
     
     // Check if backend is available
     func checkBackendHealth() async -> Bool {
-        guard let url = URL(string: "http://localhost:3000/health") else { return false }
+        guard let url = URL(string: "http://localhost:48395/health") else { return false }
         
         do {
             let (data, response) = try await URLSession.shared.data(from: url)
