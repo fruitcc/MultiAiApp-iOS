@@ -37,15 +37,9 @@ struct SettingsView: View {
                             }
                         
                         HStack {
-                            Button("Reset to Default") {
-                                settingsManager.resetToDefaults()
-                                tempBackendURL = settingsManager.backendURL
-                            }
-                            .foregroundColor(.orange)
-                            
                             Spacer()
                             
-                            Button("Test Connection") {
+                            Button(action: {
                                 // Capture the current value immediately
                                 let urlToTest = tempBackendURL
                                 print("[SettingsView] Test button clicked. Captured URL: \(urlToTest)")
@@ -58,8 +52,15 @@ struct SettingsView: View {
                                     // Use the captured value, not the binding
                                     await testConnectionWithURL(urlToTest)
                                 }
+                            }) {
+                                Text("Test Connection")
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 8)
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(8)
                             }
-                            .foregroundColor(.blue)
+                            .buttonStyle(PlainButtonStyle())
                         }
                     }
                     .padding(.vertical, 4)
