@@ -7,6 +7,7 @@ struct AIResponseView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
+            // Platform selector buttons
             HStack {
                 ForEach(Array(responses.enumerated()), id: \.element.id) { index, response in
                     Button(action: {
@@ -29,34 +30,15 @@ struct AIResponseView: View {
                 }
             }
             
-            if responses.indices.contains(selectedIndex) {
-                let currentResponse = responses[selectedIndex]
-                
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.gray.opacity(0.1))
-                    
-                    if currentResponse.isLoading {
-                        HStack {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle())
-                                .scaleEffect(0.8)
-                            Text("Loading...")
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                        }
-                        .padding()
-                    } else if let error = currentResponse.error {
-                        Text(error)
-                            .font(.caption)
-                            .foregroundColor(.red)
-                            .padding()
-                    } else {
-                        Text(currentResponse.content)
-                            .padding()
-                            .frame(maxWidth: .infinity, alignment: .leading)
+            // Response content with smooth swipe animation
+            GeometryReader { geometry in
+                HStack(spacing: 20) {
+                    ForEach(Array(responses.enumerated()), id: \.element.id) { index, response in
+                        ResponseCard(response: response)
+                            .frame(width: geometry.size.width)
                     }
                 }
+                .offset(x: -CGFloat(selectedIndex) * (geometry.size.width + 20) + dragOffset)
                 .gesture(
                     DragGesture()
                         .onChanged { value in
@@ -64,17 +46,64 @@ struct AIResponseView: View {
                         }
                         .onEnded { value in
                             let threshold: CGFloat = 50
-                            withAnimation(.spring()) {
-                                if value.translation.width > threshold && selectedIndex > 0 {
-                                    selectedIndex -= 1
-                                } else if value.translation.width < -threshold && selectedIndex < responses.count - 1 {
-                                    selectedIndex += 1
+                            let velocity = value.predictedEndTranslation.width - value.translation.width
+                            
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                if value.translation.width > threshold || velocity > 200 {
+                                    // Swipe right
+                                    if selectedIndex > 0 {
+                                        selectedIndex -= 1
+                                    }
+                                } else if value.translation.width < -threshold || velocity < -200 {
+                                    // Swipe left
+                                    if selectedIndex < responses.count - 1 {
+                                        selectedIndex += 1
+                                    }
                                 }
                                 dragOffset = 0
                             }
                         }
                 )
-                .offset(x: dragOffset * 0.3)
+                .animation(.spring(response: 0.3, dampingFraction: 0.8), value: selectedIndex)
+                .animation(.spring(response: 0.3, dampingFraction: 0.8), value: dragOffset)
+            }
+            .frame(height: 200) // Adjust height as needed
+        }
+    }
+}
+
+struct ResponseCard: View {
+    let response: AIResponse
+    
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.gray.opacity(0.1))
+            
+            if response.isLoading {
+                HStack {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .scaleEffect(0.8)
+                    Text("Loading...")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+                .padding()
+            } else if let error = response.error {
+                ScrollView {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            } else {
+                ScrollView {
+                    Text(response.content)
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
         }
     }

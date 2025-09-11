@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -38,7 +38,7 @@
 		A06A661A30DC33A5FEE9E944 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		A7D5ED12FEDCDD1DF2E29421 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A9E90225FB0AB38E59992292 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		B65271BAEDFFD16CC55A1D34 /* MultiAiApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = MultiAiApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B65271BAEDFFD16CC55A1D34 /* MultiAiApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MultiAiApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C04E6A284AF72C937DF0A6B0 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		CFE309DF8957169EEA09245D /* APIKeys-Template.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "APIKeys-Template.swift"; sourceTree = "<group>"; };
 		DF506DF787ECE849ABBABFD6 /* SettingsManager+DevKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsManager+DevKeys.swift"; sourceTree = "<group>"; };
@@ -155,7 +155,6 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					1A6A59C89E3A01F08C44BCC8 = {
-						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -170,7 +169,6 @@
 			);
 			mainGroup = 2B5C056D8EC18E8D02AC7B59;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -222,7 +220,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = K6V64KS775;
 				INFOPLIST_FILE = MultiAiApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -306,7 +304,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = K6V64KS775;
 				INFOPLIST_FILE = MultiAiApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
