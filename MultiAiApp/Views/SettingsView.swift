@@ -38,9 +38,11 @@ struct SettingsView: View {
                             Spacer()
                             
                             Button("Test Connection") {
-                                // Save before testing
-                                settingsManager.backendURL = tempBackendURL
-                                settingsManager.saveSettings()
+                                // Save current URL before testing
+                                if !tempBackendURL.isEmpty {
+                                    settingsManager.clearAndSetURL(tempBackendURL)
+                                    APIManager.shared.configure(with: settingsManager)
+                                }
                                 Task {
                                     await checkBackendConnection()
                                 }
@@ -201,8 +203,14 @@ struct SettingsView: View {
             return
         }
         
-        settingsManager.backendURL = tempBackendURL
-        settingsManager.saveSettings()
+        print("[SettingsView] Saving URL: \(tempBackendURL)")
+        
+        // Use clearAndSetURL to ensure proper saving
+        settingsManager.clearAndSetURL(tempBackendURL)
+        
+        // Force re-configure APIManager with updated settings
+        APIManager.shared.configure(with: settingsManager)
+        
         showingSaveAlert = true
         
         // Test connection after saving

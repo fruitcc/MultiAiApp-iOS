@@ -75,6 +75,17 @@ class SettingsManager: ObservableObject {
         saveSettings()
     }
     
+    func clearAndSetURL(_ url: String) {
+        // Clear old value first
+        userDefaults.removeObject(forKey: "backendURL")
+        userDefaults.synchronize()
+        
+        // Set new value
+        backendURL = url
+        saveSettings()
+        print("[Settings] Cleared old URL and set new URL: \(url)")
+    }
+    
     // Check if backend URL is valid format
     func isValidURL(_ urlString: String) -> Bool {
         guard let url = URL(string: urlString),
