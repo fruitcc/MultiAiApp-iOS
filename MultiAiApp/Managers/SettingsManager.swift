@@ -53,18 +53,26 @@ class SettingsManager: ObservableObject {
         userDefaults.set(isGeminiEnabled, forKey: "isGeminiEnabled")
         userDefaults.set(isClaudeEnabled, forKey: "isClaudeEnabled")
         userDefaults.set(isPerplexityEnabled, forKey: "isPerplexityEnabled")
+        
+        // Force synchronize to ensure settings are saved immediately
+        userDefaults.synchronize()
+        
+        print("[Settings] Saved - Backend URL: \(backendURL), Use Custom: \(useCustomBackendURL)")
     }
     
     func getBackendURL() -> String {
+        let url: String
         if useCustomBackendURL && !backendURL.isEmpty {
-            return backendURL
+            url = backendURL
+        } else {
+            #if DEBUG
+            url = Self.defaultLocalURL
+            #else
+            url = backendURL.isEmpty ? Self.defaultProductionURL : backendURL
+            #endif
         }
-        
-        #if DEBUG
-        return Self.defaultLocalURL
-        #else
-        return backendURL.isEmpty ? Self.defaultProductionURL : backendURL
-        #endif
+        print("[Settings] Getting backend URL - Custom: \(useCustomBackendURL), URL: \(url)")
+        return url
     }
     
     func resetToDefaults() {

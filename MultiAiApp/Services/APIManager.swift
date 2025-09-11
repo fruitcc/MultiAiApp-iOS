@@ -96,7 +96,12 @@ class APIManager {
     
     // Check if backend is available
     func checkBackendHealth() async -> Bool {
-        guard let url = URL(string: BackendConfig.healthURL) else { return false }
+        let healthURL = BackendConfig.healthURL
+        print("[Backend] Checking health at URL: \(healthURL)")
+        guard let url = URL(string: healthURL) else { 
+            print("[Backend] Invalid URL: \(healthURL)")
+            return false 
+        }
         
         do {
             let (data, response) = try await URLSession.shared.data(from: url)
