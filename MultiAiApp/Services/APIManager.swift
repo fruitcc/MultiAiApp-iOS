@@ -4,8 +4,12 @@ class APIManager {
     static let shared = APIManager()
     private var settingsManager: SettingsManager?
     
-    // Backend URL is now configured in BackendConfig.swift
+    // Get backend URL directly from configured SettingsManager
     private var backendURL: String {
+        if let settingsManager = settingsManager {
+            return "\(settingsManager.getBackendURL())/api/ai"
+        }
+        // Fallback to BackendConfig if not configured yet
         return BackendConfig.apiURL
     }
     
@@ -96,7 +100,8 @@ class APIManager {
     
     // Check if backend is available
     func checkBackendHealth() async -> Bool {
-        let healthURL = BackendConfig.healthURL
+        let baseURL = settingsManager?.getBackendURL() ?? BackendConfig.baseURL
+        let healthURL = "\(baseURL)/health"
         print("[Backend] Checking health at URL: \(healthURL)")
         guard let url = URL(string: healthURL) else { 
             print("[Backend] Invalid URL: \(healthURL)")
@@ -121,7 +126,9 @@ class APIManager {
     
     // Get available services from backend
     func getAvailableServices() async -> [String] {
-        guard let url = URL(string: BackendConfig.getServicesURL()) else { return [] }
+        let baseURL = settingsManager?.getBackendURL() ?? BackendConfig.baseURL
+        let servicesURL = "\(baseURL)/api/ai/services"
+        guard let url = URL(string: servicesURL) else { return [] }
         
         do {
             let (data, _) = try await URLSession.shared.data(from: url)

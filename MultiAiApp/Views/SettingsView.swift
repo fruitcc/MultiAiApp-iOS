@@ -186,6 +186,8 @@ struct SettingsView: View {
             }
             .onAppear {
                 tempBackendURL = settingsManager.backendURL
+                // Ensure APIManager is configured with settingsManager
+                APIManager.shared.configure(with: settingsManager)
                 Task {
                     await checkBackendConnection()
                 }
@@ -212,6 +214,9 @@ struct SettingsView: View {
     
     private func checkBackendConnection() async {
         backendStatus = .checking
+        
+        // Ensure APIManager has the current settingsManager
+        APIManager.shared.configure(with: settingsManager)
         
         let isConnected = await APIManager.shared.checkBackendHealth()
         
