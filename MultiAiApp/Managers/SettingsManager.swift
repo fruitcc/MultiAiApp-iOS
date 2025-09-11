@@ -67,6 +67,7 @@ class SettingsManager: ObservableObject {
     }
     
     func resetToDefaults() {
+        print("[Settings] resetToDefaults called!")
         #if DEBUG
         backendURL = Self.defaultLocalURL
         #else

@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct SettingsView: View {
     @EnvironmentObject var settingsManager: SettingsManager
@@ -7,7 +8,7 @@ struct SettingsView: View {
     @State private var availableServices: [String] = []
     @State private var tempBackendURL: String = ""
     @State private var showingInvalidURLAlert = false
-    @State private var hasInitialized = false
+    @State private var isFirstAppear = true
     
     enum BackendStatus {
         case checking
@@ -45,10 +46,17 @@ struct SettingsView: View {
                             Spacer()
                             
                             Button("Test Connection") {
-                                print("[SettingsView] Test button clicked. Current text field value: \(tempBackendURL)")
+                                // Capture the current value immediately
+                                let urlToTest = tempBackendURL
+                                print("[SettingsView] Test button clicked. Captured URL: \(urlToTest)")
                                 print("[SettingsView] Settings manager URL: \(settingsManager.backendURL)")
+                                
+                                // Dismiss keyboard first
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                
                                 Task {
-                                    await testConnectionWithURL(tempBackendURL)
+                                    // Use the captured value, not the binding
+                                    await testConnectionWithURL(urlToTest)
                                 }
                             }
                             .foregroundColor(.blue)
@@ -187,17 +195,21 @@ struct SettingsView: View {
                 Text("Please enter a valid URL starting with http:// or https://")
             }
             .onAppear {
-                print("[SettingsView] onAppear - hasInitialized: \(hasInitialized), tempBackendURL: \(tempBackendURL), settingsManager.backendURL: \(settingsManager.backendURL)")
-                // Only initialize once
-                if !hasInitialized {
+                print("[SettingsView] onAppear - isFirstAppear: \(isFirstAppear), tempBackendURL: \(tempBackendURL), settingsManager.backendURL: \(settingsManager.backendURL)")
+                
+                // Only load from settings on the very first appear
+                if isFirstAppear && tempBackendURL.isEmpty {
                     tempBackendURL = settingsManager.backendURL
-                    hasInitialized = true
-                    print("[SettingsView] Initialized tempBackendURL to: \(tempBackendURL)")
+                    print("[SettingsView] First appear - initialized tempBackendURL to: \(tempBackendURL)")
                 }
-                // Ensure APIManager is configured with settingsManager
-                APIManager.shared.configure(with: settingsManager)
-                Task {
-                    await checkBackendConnection()
+                
+                if isFirstAppear {
+                    isFirstAppear = false
+                    // Ensure APIManager is configured with settingsManager
+                    APIManager.shared.configure(with: settingsManager)
+                    Task {
+                        await checkBackendConnection()
+                    }
                 }
             }
         }
