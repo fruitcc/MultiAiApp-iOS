@@ -4,8 +4,10 @@ class APIManager {
     static let shared = APIManager()
     private var settingsManager: SettingsManager?
     
-    // Backend URL - change this to your production URL when deploying
-    private let backendURL = "http://localhost:48395/api/ai"
+    // Backend URL is now configured in BackendConfig.swift
+    private var backendURL: String {
+        return BackendConfig.apiURL
+    }
     
     private init() {}
     
@@ -94,7 +96,7 @@ class APIManager {
     
     // Check if backend is available
     func checkBackendHealth() async -> Bool {
-        guard let url = URL(string: "http://localhost:48395/health") else { return false }
+        guard let url = URL(string: BackendConfig.healthURL) else { return false }
         
         do {
             let (data, response) = try await URLSession.shared.data(from: url)
@@ -114,7 +116,7 @@ class APIManager {
     
     // Get available services from backend
     func getAvailableServices() async -> [String] {
-        guard let url = URL(string: "\(backendURL)/services") else { return [] }
+        guard let url = URL(string: BackendConfig.getServicesURL()) else { return [] }
         
         do {
             let (data, _) = try await URLSession.shared.data(from: url)

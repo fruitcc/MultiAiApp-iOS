@@ -6,7 +6,10 @@
       "Read(//Users/guochen/code/MultiAiApp-Backend/**)",
       "Bash(npx tsc:*)",
       "Bash(npm run dev:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
