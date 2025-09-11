@@ -36,31 +36,50 @@ struct SettingsView: View {
                                 print("[SettingsView] TextField changed to: \(newValue)")
                             }
                         
-                        HStack {
-                            Spacer()
-                            
-                            Button(action: {
-                                // Capture the current value immediately
-                                let urlToTest = tempBackendURL
-                                print("[SettingsView] Test button clicked. Captured URL: \(urlToTest)")
-                                print("[SettingsView] Settings manager URL: \(settingsManager.backendURL)")
-                                
-                                // Dismiss keyboard first
-                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                
-                                Task {
-                                    // Use the captured value, not the binding
-                                    await testConnectionWithURL(urlToTest)
+                        VStack(spacing: 12) {
+                            HStack {
+                                Button(action: {
+                                    // Save and test
+                                    saveSettings()
+                                }) {
+                                    Text("Save URL")
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 10)
+                                        .background(Color.green)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(8)
                                 }
-                            }) {
-                                Text("Test Connection")
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 8)
-                                    .background(Color.blue)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(8)
+                                .buttonStyle(PlainButtonStyle())
+                                
+                                Button(action: {
+                                    // Capture the current value immediately
+                                    let urlToTest = tempBackendURL
+                                    print("[SettingsView] Test button clicked. Captured URL: \(urlToTest)")
+                                    print("[SettingsView] Settings manager URL: \(settingsManager.backendURL)")
+                                    
+                                    // Dismiss keyboard first
+                                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                    
+                                    Task {
+                                        // Use the captured value, not the binding
+                                        await testConnectionWithURL(urlToTest)
+                                    }
+                                }) {
+                                    Text("Test Connection")
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 10)
+                                        .background(Color.blue)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(8)
+                                }
+                                .buttonStyle(PlainButtonStyle())
                             }
-                            .buttonStyle(PlainButtonStyle())
+                            
+                            if tempBackendURL != settingsManager.backendURL {
+                                Text("⚠️ URL not saved. Click 'Save URL' to use this URL for API calls.")
+                                    .font(.caption)
+                                    .foregroundColor(.orange)
+                            }
                         }
                     }
                     .padding(.vertical, 4)
@@ -172,17 +191,6 @@ struct SettingsView: View {
                     }
                 }
                 
-                Section {
-                    Button(action: saveSettings) {
-                        HStack {
-                            Spacer()
-                            Text("Save Settings")
-                                .foregroundColor(.white)
-                            Spacer()
-                        }
-                    }
-                    .listRowBackground(Color.blue)
-                }
             }
             .navigationTitle("Settings")
             .alert("Settings Saved", isPresented: $showingSaveAlert) {
