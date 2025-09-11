@@ -1,19 +1,21 @@
 import Foundation
 
-// DEVELOPMENT ONLY - Add to .gitignore!
-// Uncomment and add your keys for quick testing
-
+// DEVELOPMENT ONLY - Configuration helper
 extension SettingsManager {
-    func loadDevelopmentKeys() {
-        // Uncomment and add your actual API keys here for development
-        // WARNING: Never commit this file with real keys!
+    func loadDevelopmentConfiguration() {
+        // Set development backend URL if needed
+        // Uncomment and modify for your development setup
         
-        // chatGPTAPIKey = "your-chatgpt-key-here"
-        // geminiAPIKey = "your-gemini-key-here"  
-        // claudeAPIKey = "your-claude-key-here"
-        // perplexityAPIKey = "your-perplexity-key-here"
+        // For simulator testing:
+        // backendURL = "http://localhost:48395"
         
-        // Save them to UserDefaults so they persist
+        // For device testing with local backend:
+        // backendURL = "http://192.168.1.100:48395" // Replace with your Mac's IP
+        
+        // For testing with production backend:
+        // backendURL = "http://YOUR_SERVER_IP"
+        
+        // useCustomBackendURL = true
         // saveSettings()
     }
 }

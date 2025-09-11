@@ -55,19 +55,15 @@ class KeychainManager {
     }
 }
 
-// Usage in SettingsManager
+// Backend URL storage in Keychain (optional - for enhanced security)
 extension SettingsManager {
-    func saveKeysToKeychain() {
-        KeychainManager.shared.save(key: "chatGPT", value: chatGPTAPIKey, for: "MultiAiApp")
-        KeychainManager.shared.save(key: "gemini", value: geminiAPIKey, for: "MultiAiApp")
-        KeychainManager.shared.save(key: "claude", value: claudeAPIKey, for: "MultiAiApp")
-        KeychainManager.shared.save(key: "perplexity", value: perplexityAPIKey, for: "MultiAiApp")
+    func saveBackendURLToKeychain() {
+        if useCustomBackendURL {
+            KeychainManager.shared.save(key: "backendURL", value: backendURL, for: "MultiAiApp")
+        }
     }
     
-    func loadKeysFromKeychain() {
-        chatGPTAPIKey = KeychainManager.shared.retrieve(key: "chatGPT", for: "MultiAiApp") ?? ""
-        geminiAPIKey = KeychainManager.shared.retrieve(key: "gemini", for: "MultiAiApp") ?? ""
-        claudeAPIKey = KeychainManager.shared.retrieve(key: "claude", for: "MultiAiApp") ?? ""
-        perplexityAPIKey = KeychainManager.shared.retrieve(key: "perplexity", for: "MultiAiApp") ?? ""
+    func loadBackendURLFromKeychain() -> String? {
+        return KeychainManager.shared.retrieve(key: "backendURL", for: "MultiAiApp")
     }
 }
