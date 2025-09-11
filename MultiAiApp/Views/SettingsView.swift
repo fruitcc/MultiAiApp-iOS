@@ -39,18 +39,8 @@ struct SettingsView: View {
                             Spacer()
                             
                             Button("Test Connection") {
-                                // Store the URL before any operations
-                                let urlToTest = tempBackendURL
-                                
-                                // Save current URL before testing
-                                if !urlToTest.isEmpty {
-                                    settingsManager.clearAndSetURL(urlToTest)
-                                    APIManager.shared.configure(with: settingsManager)
-                                    // Restore the temp URL in case it got reset
-                                    tempBackendURL = urlToTest
-                                }
                                 Task {
-                                    await checkBackendConnection()
+                                    await testConnectionWithURL(tempBackendURL)
                                 }
                             }
                             .foregroundColor(.blue)
@@ -212,15 +202,16 @@ struct SettingsView: View {
         
         print("[SettingsView] Saving URL: \(tempBackendURL)")
         
-        // Use clearAndSetURL to ensure proper saving
-        settingsManager.clearAndSetURL(tempBackendURL)
+        // Save the URL from the text field
+        settingsManager.backendURL = tempBackendURL
+        settingsManager.saveSettings()
         
         // Force re-configure APIManager with updated settings
         APIManager.shared.configure(with: settingsManager)
         
         showingSaveAlert = true
         
-        // Test connection after saving
+        // Test connection after saving using the standard method
         Task {
             await checkBackendConnection()
         }
@@ -238,6 +229,53 @@ struct SettingsView: View {
             backendStatus = .connected
             availableServices = await APIManager.shared.getAvailableServices()
         } else {
+            backendStatus = .disconnected
+            availableServices = []
+        }
+    }
+    
+    private func testConnectionWithURL(_ urlToTest: String) async {
+        guard !urlToTest.isEmpty else { return }
+        
+        backendStatus = .checking
+        
+        // Test the URL directly without modifying any settings
+        let healthURL = "\(urlToTest)/health"
+        let servicesURL = "\(urlToTest)/api/ai/services"
+        
+        print("[SettingsView] Testing connection to: \(healthURL)")
+        
+        guard let healthEndpoint = URL(string: healthURL) else {
+            print("[SettingsView] Invalid URL: \(healthURL)")
+            backendStatus = .disconnected
+            return
+        }
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(from: healthEndpoint)
+            
+            if let httpResponse = response as? HTTPURLResponse,
+               httpResponse.statusCode == 200,
+               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let status = json["status"] as? String,
+               status == "ok" {
+                
+                backendStatus = .connected
+                
+                // Try to get services
+                if let servicesEndpoint = URL(string: servicesURL) {
+                    let (servicesData, _) = try await URLSession.shared.data(from: servicesEndpoint)
+                    if let servicesJson = try? JSONSerialization.jsonObject(with: servicesData) as? [String: Any],
+                       let services = servicesJson["services"] as? [String] {
+                        availableServices = services
+                    }
+                }
+            } else {
+                backendStatus = .disconnected
+                availableServices = []
+            }
+        } catch {
+            print("[SettingsView] Connection test failed: \(error.localizedDescription)")
             backendStatus = .disconnected
             availableServices = []
         }
