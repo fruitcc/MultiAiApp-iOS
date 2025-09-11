@@ -17,6 +17,10 @@ struct MultiAiApp: App {
                 .onAppear {
                     // Configure ChatManager with SettingsManager
                     chatManager.configure(with: settingsManager)
+                    // Set SettingsManager reference for BackendConfig
+                    BackendConfigHelper.shared.settingsManager = settingsManager
+                    // Configure APIManager with SettingsManager
+                    APIManager.shared.configure(with: settingsManager)
                 }
         }
     }

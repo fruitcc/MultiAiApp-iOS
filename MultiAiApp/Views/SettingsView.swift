@@ -5,6 +5,8 @@ struct SettingsView: View {
     @State private var showingSaveAlert = false
     @State private var backendStatus: BackendStatus = .checking
     @State private var availableServices: [String] = []
+    @State private var tempBackendURL: String = ""
+    @State private var showingInvalidURLAlert = false
     
     enum BackendStatus {
         case checking
@@ -15,7 +17,46 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Backend Connection")) {
+                Section(header: Text("Backend Configuration")) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Backend URL")
+                            .font(.headline)
+                        
+                        TextField("http://localhost:48395", text: $tempBackendURL)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .autocapitalization(.none)
+                            .disableAutocorrection(true)
+                            .keyboardType(.URL)
+                        
+                        Toggle("Use Custom URL", isOn: $settingsManager.useCustomBackendURL)
+                        
+                        if !settingsManager.useCustomBackendURL {
+                            Text("Using default: \(SettingsManager.defaultLocalURL)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        HStack {
+                            Button("Reset to Default") {
+                                settingsManager.resetToDefaults()
+                                tempBackendURL = settingsManager.backendURL
+                            }
+                            .foregroundColor(.orange)
+                            
+                            Spacer()
+                            
+                            Button("Test Connection") {
+                                Task {
+                                    await checkBackendConnection()
+                                }
+                            }
+                            .foregroundColor(.blue)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+                
+                Section(header: Text("Connection Status")) {
                     HStack {
                         Text("Backend Status")
                         Spacer()
@@ -49,67 +90,75 @@ struct SettingsView: View {
                         }
                     }
                     
-                    Button("Refresh Connection") {
-                        Task {
-                            await checkBackendConnection()
+                    if backendStatus == .disconnected {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Troubleshooting:")
+                                .font(.caption.bold())
+                                .foregroundColor(.secondary)
+                            Text("• Check if backend is running")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Text("• Verify the URL is correct")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Text("• For device testing, use your Mac's IP")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
                         }
                     }
                 }
                 
-                Section(header: Text("Backend Mode Info")) {
+                Section(header: Text("Quick Setup Guide")) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Label("Using Backend Service", systemImage: "server.rack")
-                            .font(.caption)
-                        Text("API keys are managed by the backend server at localhost:3000")
+                        Label("Simulator", systemImage: "desktopcomputer")
+                            .font(.caption.bold())
+                        Text("Use: http://localhost:48395")
                             .font(.caption2)
                             .foregroundColor(.secondary)
-                        Text("Individual API key settings below are not used in backend mode")
+                        
+                        Divider()
+                        
+                        Label("Physical Device", systemImage: "iphone")
+                            .font(.caption.bold())
+                        Text("Use: http://YOUR_MAC_IP:48395")
                             .font(.caption2)
-                            .foregroundColor(.orange)
+                            .foregroundColor(.secondary)
+                        Text("Find IP: System Preferences > Network")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                        
+                        Divider()
+                        
+                        Label("Production", systemImage: "cloud")
+                            .font(.caption.bold())
+                        Text("Use: http://YOUR_SERVER_IP")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
                     }
+                    .padding(.vertical, 4)
                 }
                 
-                Section(header: Text("ChatGPT Configuration (Not Used in Backend Mode)")) {
-                    Toggle("Enable ChatGPT", isOn: $settingsManager.isChatGPTEnabled)
-                        .disabled(true)
-                    if settingsManager.isChatGPTEnabled {
-                        SecureField("API Key", text: $settingsManager.chatGPTAPIKey)
-                            .textContentType(.password)
-                            .autocapitalization(.none)
-                            .disabled(true)
-                    }
-                }
-                
-                Section(header: Text("Google Gemini Configuration (Not Used in Backend Mode)")) {
-                    Toggle("Enable Gemini", isOn: $settingsManager.isGeminiEnabled)
-                        .disabled(true)
-                    if settingsManager.isGeminiEnabled {
-                        SecureField("API Key", text: $settingsManager.geminiAPIKey)
-                            .textContentType(.password)
-                            .autocapitalization(.none)
-                            .disabled(true)
-                    }
-                }
-                
-                Section(header: Text("Claude Configuration (Not Used in Backend Mode)")) {
-                    Toggle("Enable Claude", isOn: $settingsManager.isClaudeEnabled)
-                        .disabled(true)
-                    if settingsManager.isClaudeEnabled {
-                        SecureField("API Key", text: $settingsManager.claudeAPIKey)
-                            .textContentType(.password)
-                            .autocapitalization(.none)
-                            .disabled(true)
-                    }
-                }
-                
-                Section(header: Text("Perplexity Configuration (Not Used in Backend Mode)")) {
-                    Toggle("Enable Perplexity", isOn: $settingsManager.isPerplexityEnabled)
-                        .disabled(true)
-                    if settingsManager.isPerplexityEnabled {
-                        SecureField("API Key", text: $settingsManager.perplexityAPIKey)
-                            .textContentType(.password)
-                            .autocapitalization(.none)
-                            .disabled(true)
+                Section(header: Text("Service Status")) {
+                    ForEach(AIPlatform.allCases, id: \.self) { platform in
+                        HStack {
+                            Image(systemName: platform.iconName)
+                                .foregroundColor(platform.color)
+                            Text(platform.rawValue)
+                            Spacer()
+                            if backendStatus == .connected && availableServices.contains(platformToService(platform)) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                                Text("Available")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            } else {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.gray)
+                                Text("Not Available")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
                     }
                 }
                 
@@ -123,39 +172,21 @@ struct SettingsView: View {
                         }
                     }
                     .listRowBackground(Color.blue)
-                    .disabled(true)
-                }
-                
-                Section(header: Text("Service Status")) {
-                    ForEach(AIPlatform.allCases, id: \.self) { platform in
-                        HStack {
-                            Image(systemName: platform.iconName)
-                                .foregroundColor(platform.color)
-                            Text(platform.rawValue)
-                            Spacer()
-                            if backendStatus == .connected {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.green)
-                                Text("Via Backend")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            } else {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.red)
-                            }
-                        }
-                    }
                 }
             }
             .navigationTitle("Settings")
-            .alert(isPresented: $showingSaveAlert) {
-                Alert(
-                    title: Text("Settings Saved"),
-                    message: Text("Your API configurations have been saved successfully."),
-                    dismissButton: .default(Text("OK"))
-                )
+            .alert("Settings Saved", isPresented: $showingSaveAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("Your backend configuration has been saved successfully.")
+            }
+            .alert("Invalid URL", isPresented: $showingInvalidURLAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("Please enter a valid URL starting with http:// or https://")
             }
             .onAppear {
+                tempBackendURL = settingsManager.backendURL
                 Task {
                     await checkBackendConnection()
                 }
@@ -164,8 +195,20 @@ struct SettingsView: View {
     }
     
     private func saveSettings() {
+        // Validate URL if custom URL is enabled
+        if settingsManager.useCustomBackendURL && !settingsManager.isValidURL(tempBackendURL) {
+            showingInvalidURLAlert = true
+            return
+        }
+        
+        settingsManager.backendURL = tempBackendURL
         settingsManager.saveSettings()
         showingSaveAlert = true
+        
+        // Test connection after saving
+        Task {
+            await checkBackendConnection()
+        }
     }
     
     private func checkBackendConnection() async {
@@ -179,6 +222,19 @@ struct SettingsView: View {
         } else {
             backendStatus = .disconnected
             availableServices = []
+        }
+    }
+    
+    private func platformToService(_ platform: AIPlatform) -> String {
+        switch platform {
+        case .chatGPT:
+            return "openai"
+        case .gemini:
+            return "google"
+        case .claude:
+            return "anthropic"
+        case .perplexity:
+            return "perplexity"
         }
     }
 }

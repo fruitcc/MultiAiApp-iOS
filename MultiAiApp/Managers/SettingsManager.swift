@@ -2,13 +2,11 @@ import Foundation
 import SwiftUI
 
 class SettingsManager: ObservableObject {
-    // For development: Create APIKeys.swift from APIKeys-Template.swift with your keys
-    // For production: Use environment variables or keychain
-    @Published var chatGPTAPIKey: String = ""
-    @Published var geminiAPIKey: String = ""
-    @Published var claudeAPIKey: String = ""
-    @Published var perplexityAPIKey: String = ""
+    // Backend URL configuration
+    @Published var backendURL: String = ""
+    @Published var useCustomBackendURL: Bool = false
     
+    // Service enablement states (managed by backend)
     @Published var isChatGPTEnabled: Bool = true
     @Published var isGeminiEnabled: Bool = true
     @Published var isClaudeEnabled: Bool = true
@@ -16,63 +14,77 @@ class SettingsManager: ObservableObject {
     
     private let userDefaults = UserDefaults.standard
     
+    // Default backend URLs
+    static let defaultLocalURL = "http://localhost:48395"
+    static let defaultProductionURL = "http://YOUR_LINODE_IP" // User should update this
+    
     init() {
         loadSettings()
     }
     
     func loadSettings() {
-        // For now, using UserDefaults (switch to Keychain when ready)
-        chatGPTAPIKey = userDefaults.string(forKey: "chatGPTAPIKey") ?? ""
-        geminiAPIKey = userDefaults.string(forKey: "geminiAPIKey") ?? ""
-        claudeAPIKey = userDefaults.string(forKey: "claudeAPIKey") ?? ""
-        perplexityAPIKey = userDefaults.string(forKey: "perplexityAPIKey") ?? ""
+        // Load backend URL configuration
+        backendURL = userDefaults.string(forKey: "backendURL") ?? Self.defaultLocalURL
+        useCustomBackendURL = userDefaults.bool(forKey: "useCustomBackendURL")
         
+        // Load service states (these are just for UI display now)
         isChatGPTEnabled = userDefaults.bool(forKey: "isChatGPTEnabled")
         isGeminiEnabled = userDefaults.bool(forKey: "isGeminiEnabled")
         isClaudeEnabled = userDefaults.bool(forKey: "isClaudeEnabled")
         isPerplexityEnabled = userDefaults.bool(forKey: "isPerplexityEnabled")
+        
+        // Set defaults if not previously set
+        if !userDefaults.bool(forKey: "hasSetDefaults") {
+            isChatGPTEnabled = true
+            isGeminiEnabled = true
+            isClaudeEnabled = true
+            isPerplexityEnabled = true
+            userDefaults.set(true, forKey: "hasSetDefaults")
+        }
     }
     
     func saveSettings() {
-        // Save API keys to UserDefaults (temporary - should use Keychain in production)
-        userDefaults.set(chatGPTAPIKey, forKey: "chatGPTAPIKey")
-        userDefaults.set(geminiAPIKey, forKey: "geminiAPIKey")
-        userDefaults.set(claudeAPIKey, forKey: "claudeAPIKey")
-        userDefaults.set(perplexityAPIKey, forKey: "perplexityAPIKey")
+        // Save backend URL configuration
+        userDefaults.set(backendURL, forKey: "backendURL")
+        userDefaults.set(useCustomBackendURL, forKey: "useCustomBackendURL")
         
-        // Save toggle states to UserDefaults
+        // Save service states
         userDefaults.set(isChatGPTEnabled, forKey: "isChatGPTEnabled")
         userDefaults.set(isGeminiEnabled, forKey: "isGeminiEnabled")
         userDefaults.set(isClaudeEnabled, forKey: "isClaudeEnabled")
         userDefaults.set(isPerplexityEnabled, forKey: "isPerplexityEnabled")
     }
     
-    func isAPIKeyConfigured(for platform: AIPlatform) -> Bool {
-        switch platform {
-        case .chatGPT:
-            return !chatGPTAPIKey.isEmpty && isChatGPTEnabled
-        case .gemini:
-            return !geminiAPIKey.isEmpty && isGeminiEnabled
-        case .claude:
-            return !claudeAPIKey.isEmpty && isClaudeEnabled
-        case .perplexity:
-            return !perplexityAPIKey.isEmpty && isPerplexityEnabled
+    func getBackendURL() -> String {
+        if useCustomBackendURL && !backendURL.isEmpty {
+            return backendURL
         }
-    }
-    
-    func getAPIKey(for platform: AIPlatform) -> String? {
-        guard isAPIKeyConfigured(for: platform) else { return nil }
         
-        switch platform {
-        case .chatGPT:
-            return chatGPTAPIKey
-        case .gemini:
-            return geminiAPIKey
-        case .claude:
-            return claudeAPIKey
-        case .perplexity:
-            return perplexityAPIKey
-        }
+        #if DEBUG
+        return Self.defaultLocalURL
+        #else
+        return backendURL.isEmpty ? Self.defaultProductionURL : backendURL
+        #endif
     }
     
+    func resetToDefaults() {
+        #if DEBUG
+        backendURL = Self.defaultLocalURL
+        #else
+        backendURL = Self.defaultProductionURL
+        #endif
+        useCustomBackendURL = false
+        saveSettings()
+    }
+    
+    // Check if backend URL is valid format
+    func isValidURL(_ urlString: String) -> Bool {
+        guard let url = URL(string: urlString),
+              let scheme = url.scheme,
+              ["http", "https"].contains(scheme.lowercased()),
+              url.host != nil else {
+            return false
+        }
+        return true
+    }
 }

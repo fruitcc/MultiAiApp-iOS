@@ -19,6 +19,7 @@
 		7835BD79D6172873317D40CA /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = C04E6A284AF72C937DF0A6B0 /* Message.swift */; };
 		79C274DD77CF22D9C22FFF6C /* APIKeys-Template.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFE309DF8957169EEA09245D /* APIKeys-Template.swift */; };
 		7B70E62B162134AA562A9DCF /* MultiAiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 956312AE4E6334E41D1765CC /* MultiAiApp.swift */; };
+		BAB64FAAB52003308008E2A3 /* BackendConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45977BCE563A621531F88D8C /* BackendConfig.swift */; };
 		CE546C92C6237F8B7F65B8D6 /* APIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E54586B152986662711B4D2 /* APIManager.swift */; };
 		D0FFC08B0D34458D3179CBFC /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53FC688731B0D92FFF950E9C /* SettingsView.swift */; };
 /* End PBXBuildFile section */
@@ -26,6 +27,7 @@
 /* Begin PBXFileReference section */
 		2E54586B152986662711B4D2 /* APIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIManager.swift; sourceTree = "<group>"; };
 		30BE8291638979C14F7A3487 /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
+		45977BCE563A621531F88D8C /* BackendConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackendConfig.swift; sourceTree = "<group>"; };
 		53FC688731B0D92FFF950E9C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		5B94FFF463883CD8F134084C /* AIResponseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIResponseView.swift; sourceTree = "<group>"; };
 		5D47872ACBFE6F5E64F4B9FD /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
@@ -117,6 +119,7 @@
 			children = (
 				A035F5B144E9D29C5172A5F6 /* APIConfig.swift */,
 				CFE309DF8957169EEA09245D /* APIKeys-Template.swift */,
+				45977BCE563A621531F88D8C /* BackendConfig.swift */,
 			);
 			path = Config;
 			sourceTree = "<group>";
@@ -196,6 +199,7 @@
 				50A4B0E7D7FA4001F033E7FC /* APIConfig.swift in Sources */,
 				79C274DD77CF22D9C22FFF6C /* APIKeys-Template.swift in Sources */,
 				CE546C92C6237F8B7F65B8D6 /* APIManager.swift in Sources */,
+				BAB64FAAB52003308008E2A3 /* BackendConfig.swift in Sources */,
 				5BB759DBDC0C5267120FBD36 /* ChatManager.swift in Sources */,
 				1B763C543435F97E9E92100E /* ChatView.swift in Sources */,
 				0CC6E324EA3271C871A1A69F /* ContentView.swift in Sources */,

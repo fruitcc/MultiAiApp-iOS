@@ -3,28 +3,20 @@ import Foundation
 struct BackendConfig {
     // MARK: - Backend URL Configuration
     
-    // For local development with simulator
-    // Use "localhost" or "127.0.0.1" when running on iOS Simulator
-    // private static let localURL = "http://localhost:48395"
-    
-    // For testing on physical device with local backend
-    // Replace with your Mac's IP address (e.g., "http://192.168.1.100:48395")
-    // private static let localURL = "http://YOUR_MAC_IP:48395"
-    
-    // For production deployment
-    // Replace with your Linode server's IP or domain
-    // Example: "http://123.456.789.0" or "https://api.yourdomain.com"
-    private static let productionURL = "http://YOUR_LINODE_IP"
-    
-    // MARK: - Environment Selection
-    
-    #if DEBUG
-    // For development builds - change this to your Mac's IP if testing on device
-    static let baseURL = "http://localhost:48395"
-    #else
-    // For release builds - update with your production server URL
-    static let baseURL = productionURL
-    #endif
+    // Get the backend URL from SettingsManager or use defaults
+    static var baseURL: String {
+        // Try to get URL from SettingsManager if available
+        if let settingsManager = getSettingsManager() {
+            return settingsManager.getBackendURL()
+        }
+        
+        // Fallback to compile-time defaults
+        #if DEBUG
+        return "http://localhost:48395"
+        #else
+        return "http://YOUR_LINODE_IP" // User should update this in Settings
+        #endif
+    }
     
     // MARK: - API Endpoints
     
@@ -49,6 +41,20 @@ struct BackendConfig {
     static func getServicesURL() -> String {
         return "\(apiURL)/services"
     }
+    
+    // Try to get SettingsManager instance from the app
+    private static func getSettingsManager() -> SettingsManager? {
+        // This will be set by the app when it starts
+        return BackendConfigHelper.shared.settingsManager
+    }
+}
+
+// Helper class to store reference to SettingsManager
+class BackendConfigHelper {
+    static let shared = BackendConfigHelper()
+    var settingsManager: SettingsManager?
+    
+    private init() {}
 }
 
 // MARK: - Instructions for Setup
@@ -56,31 +62,34 @@ struct BackendConfig {
 /*
  SETUP INSTRUCTIONS:
  
- 1. FOR LOCAL DEVELOPMENT (iOS Simulator):
+ 1. CONFIGURE IN APP SETTINGS:
+    - Open the app and go to Settings tab
+    - Enter your backend URL in the "Backend URL" field
+    - Toggle "Use Custom URL" to enable it
+    - Tap "Save Settings"
+ 
+ 2. DEFAULT URLS:
+    - Debug builds: http://localhost:48395
+    - Release builds: Set in Settings tab
+ 
+ 3. FOR LOCAL DEVELOPMENT (iOS Simulator):
     - Keep the default "http://localhost:48395"
     - Make sure your backend is running locally: npm run dev
  
- 2. FOR TESTING ON PHYSICAL DEVICE WITH LOCAL BACKEND:
+ 4. FOR TESTING ON PHYSICAL DEVICE WITH LOCAL BACKEND:
     - Find your Mac's IP address:
       * System Preferences > Network > Wi-Fi > IP Address
       * Or run in Terminal: ifconfig | grep "inet " | grep -v 127.0.0.1
-    - Update localURL to: "http://YOUR_MAC_IP:48395"
+    - In Settings tab, enter: "http://YOUR_MAC_IP:48395"
     - Ensure your device is on the same Wi-Fi network
  
- 3. FOR PRODUCTION DEPLOYMENT:
-    - Update productionURL with your Linode server IP or domain
+ 5. FOR PRODUCTION DEPLOYMENT:
+    - In Settings tab, enter your Linode server IP or domain
     - Example: "http://123.456.789.0" or "https://api.yourdomain.com"
-    - Build in Release mode for App Store distribution
  
- 4. SWITCHING ENVIRONMENTS:
-    - Debug builds (running from Xcode) use localURL
-    - Release builds (Archive/TestFlight/App Store) use productionURL
-    - You can also manually change the baseURL assignment above
- 
- 5. TROUBLESHOOTING:
-    - If connection fails on device, check:
-      * Backend is running and accessible
-      * Correct IP address is used
-      * Firewall/network settings allow connection
-      * Info.plist has NSAppTransportSecurity configured for HTTP (if not using HTTPS)
+ 6. TROUBLESHOOTING:
+    - Check backend status in Settings tab
+    - Green checkmark = Connected
+    - Red X = Check your URL and network connection
+    - Use "Refresh Connection" button to test
  */
