@@ -27,10 +27,6 @@ struct SettingsView: View {
                             .autocapitalization(.none)
                             .disableAutocorrection(true)
                             .keyboardType(.URL)
-                            .onChange(of: tempBackendURL) { _ in
-                                // Auto-save URL when changed
-                                settingsManager.backendURL = tempBackendURL
-                            }
                         
                         HStack {
                             Button("Reset to Default") {
@@ -185,7 +181,10 @@ struct SettingsView: View {
                 Text("Please enter a valid URL starting with http:// or https://")
             }
             .onAppear {
-                tempBackendURL = settingsManager.backendURL
+                // Only set tempBackendURL if it's empty (first load)
+                if tempBackendURL.isEmpty {
+                    tempBackendURL = settingsManager.backendURL
+                }
                 // Ensure APIManager is configured with settingsManager
                 APIManager.shared.configure(with: settingsManager)
                 Task {

@@ -23,7 +23,9 @@ class SettingsManager: ObservableObject {
     
     func loadSettings() {
         // Load backend URL configuration
-        backendURL = userDefaults.string(forKey: "backendURL") ?? Self.defaultLocalURL
+        let savedURL = userDefaults.string(forKey: "backendURL")
+        backendURL = savedURL ?? Self.defaultLocalURL
+        print("[Settings] Loaded backend URL from storage: \(savedURL ?? "nil"), using: \(backendURL)")
         
         // Load service states (these are just for UI display now)
         isChatGPTEnabled = userDefaults.bool(forKey: "isChatGPTEnabled")
