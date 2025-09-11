@@ -7,6 +7,7 @@ struct SettingsView: View {
     @State private var availableServices: [String] = []
     @State private var tempBackendURL: String = ""
     @State private var showingInvalidURLAlert = false
+    @State private var hasInitialized = false
     
     enum BackendStatus {
         case checking
@@ -38,10 +39,15 @@ struct SettingsView: View {
                             Spacer()
                             
                             Button("Test Connection") {
+                                // Store the URL before any operations
+                                let urlToTest = tempBackendURL
+                                
                                 // Save current URL before testing
-                                if !tempBackendURL.isEmpty {
-                                    settingsManager.clearAndSetURL(tempBackendURL)
+                                if !urlToTest.isEmpty {
+                                    settingsManager.clearAndSetURL(urlToTest)
                                     APIManager.shared.configure(with: settingsManager)
+                                    // Restore the temp URL in case it got reset
+                                    tempBackendURL = urlToTest
                                 }
                                 Task {
                                     await checkBackendConnection()
@@ -183,9 +189,10 @@ struct SettingsView: View {
                 Text("Please enter a valid URL starting with http:// or https://")
             }
             .onAppear {
-                // Only set tempBackendURL if it's empty (first load)
-                if tempBackendURL.isEmpty {
+                // Only initialize once
+                if !hasInitialized {
                     tempBackendURL = settingsManager.backendURL
+                    hasInitialized = true
                 }
                 // Ensure APIManager is configured with settingsManager
                 APIManager.shared.configure(with: settingsManager)
