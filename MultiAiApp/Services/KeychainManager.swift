@@ -58,9 +58,7 @@ class KeychainManager {
 // Backend URL storage in Keychain (optional - for enhanced security)
 extension SettingsManager {
     func saveBackendURLToKeychain() {
-        if useCustomBackendURL {
-            KeychainManager.shared.save(key: "backendURL", value: backendURL, for: "MultiAiApp")
-        }
+        KeychainManager.shared.save(key: "backendURL", value: backendURL, for: "MultiAiApp")
     }
     
     func loadBackendURLFromKeychain() -> String? {

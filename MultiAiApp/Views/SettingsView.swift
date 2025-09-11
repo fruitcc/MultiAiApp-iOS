@@ -27,14 +27,10 @@ struct SettingsView: View {
                             .autocapitalization(.none)
                             .disableAutocorrection(true)
                             .keyboardType(.URL)
-                        
-                        Toggle("Use Custom URL", isOn: $settingsManager.useCustomBackendURL)
-                        
-                        if !settingsManager.useCustomBackendURL {
-                            Text("Using default: \(SettingsManager.defaultLocalURL)")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
+                            .onChange(of: tempBackendURL) { _ in
+                                // Auto-save URL when changed
+                                settingsManager.backendURL = tempBackendURL
+                            }
                         
                         HStack {
                             Button("Reset to Default") {
@@ -46,6 +42,9 @@ struct SettingsView: View {
                             Spacer()
                             
                             Button("Test Connection") {
+                                // Save before testing
+                                settingsManager.backendURL = tempBackendURL
+                                settingsManager.saveSettings()
                                 Task {
                                     await checkBackendConnection()
                                 }
@@ -195,8 +194,8 @@ struct SettingsView: View {
     }
     
     private func saveSettings() {
-        // Validate URL if custom URL is enabled
-        if settingsManager.useCustomBackendURL && !settingsManager.isValidURL(tempBackendURL) {
+        // Validate URL
+        if !tempBackendURL.isEmpty && !settingsManager.isValidURL(tempBackendURL) {
             showingInvalidURLAlert = true
             return
         }

@@ -4,7 +4,6 @@ import SwiftUI
 class SettingsManager: ObservableObject {
     // Backend URL configuration
     @Published var backendURL: String = ""
-    @Published var useCustomBackendURL: Bool = false
     
     // Service enablement states (managed by backend)
     @Published var isChatGPTEnabled: Bool = true
@@ -25,7 +24,6 @@ class SettingsManager: ObservableObject {
     func loadSettings() {
         // Load backend URL configuration
         backendURL = userDefaults.string(forKey: "backendURL") ?? Self.defaultLocalURL
-        useCustomBackendURL = userDefaults.bool(forKey: "useCustomBackendURL")
         
         // Load service states (these are just for UI display now)
         isChatGPTEnabled = userDefaults.bool(forKey: "isChatGPTEnabled")
@@ -46,7 +44,6 @@ class SettingsManager: ObservableObject {
     func saveSettings() {
         // Save backend URL configuration
         userDefaults.set(backendURL, forKey: "backendURL")
-        userDefaults.set(useCustomBackendURL, forKey: "useCustomBackendURL")
         
         // Save service states
         userDefaults.set(isChatGPTEnabled, forKey: "isChatGPTEnabled")
@@ -57,21 +54,13 @@ class SettingsManager: ObservableObject {
         // Force synchronize to ensure settings are saved immediately
         userDefaults.synchronize()
         
-        print("[Settings] Saved - Backend URL: \(backendURL), Use Custom: \(useCustomBackendURL)")
+        print("[Settings] Saved - Backend URL: \(backendURL)")
     }
     
     func getBackendURL() -> String {
-        let url: String
-        if useCustomBackendURL && !backendURL.isEmpty {
-            url = backendURL
-        } else {
-            #if DEBUG
-            url = Self.defaultLocalURL
-            #else
-            url = backendURL.isEmpty ? Self.defaultProductionURL : backendURL
-            #endif
-        }
-        print("[Settings] Getting backend URL - Custom: \(useCustomBackendURL), URL: \(url)")
+        // Always return the configured URL, or default if empty
+        let url = backendURL.isEmpty ? Self.defaultLocalURL : backendURL
+        print("[Settings] Getting backend URL: \(url)")
         return url
     }
     
@@ -81,7 +70,6 @@ class SettingsManager: ObservableObject {
         #else
         backendURL = Self.defaultProductionURL
         #endif
-        useCustomBackendURL = false
         saveSettings()
     }
     
