@@ -28,6 +28,12 @@ struct SettingsView: View {
                             .autocapitalization(.none)
                             .disableAutocorrection(true)
                             .keyboardType(.URL)
+                            .onSubmit {
+                                print("[SettingsView] TextField submitted with value: \(tempBackendURL)")
+                            }
+                            .onChange(of: tempBackendURL) { newValue in
+                                print("[SettingsView] TextField changed to: \(newValue)")
+                            }
                         
                         HStack {
                             Button("Reset to Default") {
@@ -39,6 +45,8 @@ struct SettingsView: View {
                             Spacer()
                             
                             Button("Test Connection") {
+                                print("[SettingsView] Test button clicked. Current text field value: \(tempBackendURL)")
+                                print("[SettingsView] Settings manager URL: \(settingsManager.backendURL)")
                                 Task {
                                     await testConnectionWithURL(tempBackendURL)
                                 }
@@ -179,10 +187,12 @@ struct SettingsView: View {
                 Text("Please enter a valid URL starting with http:// or https://")
             }
             .onAppear {
+                print("[SettingsView] onAppear - hasInitialized: \(hasInitialized), tempBackendURL: \(tempBackendURL), settingsManager.backendURL: \(settingsManager.backendURL)")
                 // Only initialize once
                 if !hasInitialized {
                     tempBackendURL = settingsManager.backendURL
                     hasInitialized = true
+                    print("[SettingsView] Initialized tempBackendURL to: \(tempBackendURL)")
                 }
                 // Ensure APIManager is configured with settingsManager
                 APIManager.shared.configure(with: settingsManager)
